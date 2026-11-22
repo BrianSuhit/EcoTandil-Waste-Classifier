@@ -2,7 +2,7 @@ from math import asin, cos, radians, sin, sqrt
 
 import folium
 
-puntos_limpios = [
+clean_points = [
     {
         "nombre": "Centro",
         "direccion": "Av. Rivadaavia 250",
@@ -46,49 +46,56 @@ puntos_limpios = [
 ]
 
 
-def distancia_km(origen, destino):
-    lat1, lon1 = map(radians, origen)
-    lat2, lon2 = map(radians, destino)
-    diferencia_lat = lat2 - lat1
-    diferencia_lon = lon2 - lon1
+def distance_km(origin, destination):
+    lat1, lon1 = map(radians, origin)
+    lat2, lon2 = map(radians, destination)
+    latitude_difference = lat2 - lat1
+    longitude_difference = lon2 - lon1
     a = (
-        sin(diferencia_lat / 2) ** 2
-        + cos(lat1) * cos(lat2) * sin(diferencia_lon / 2) ** 2
+        sin(latitude_difference / 2) ** 2
+        + cos(lat1) * cos(lat2) * sin(longitude_difference / 2) ** 2
     )
     return 6371 * 2 * asin(sqrt(min(1, a)))
 
 
-def crear_mapa(user_location):
-    mapa = folium.Map()
-    punto_mas_cercano = min(puntos_limpios, key=lambda p: distancia_km(user_location, p["coords"]))
-    distancia_cercana = distancia_km(user_location, punto_mas_cercano["coords"])
+def create_map(user_location):
+    folium_map = folium.Map()
+
+    nearest_point = None
+    nearest_distance = float("inf")
+
+    for point in clean_points:
+        current_distance = distance_km(user_location, point["coords"])
+        if current_distance < nearest_distance:
+            nearest_distance = current_distance
+            nearest_point = point
 
     folium.PolyLine(
-        locations=[user_location, punto_mas_cercano["coords"]],
+        locations=[user_location, nearest_point["coords"]],
         color="orange",
         weight=3,
-        tooltip=f"Distancia directa: {distancia_cercana:.2f} km",
-    ).add_to(mapa)
+        tooltip=f"Distancia directa: {nearest_distance:.2f} km",
+    ).add_to(folium_map)
 
-    for p in puntos_limpios:
-        es_mas_cercano = p is punto_mas_cercano
-        popup = f"{p['nombre']} - {p['direccion']}"
-        if es_mas_cercano:
-            popup += f"<br>Punto más cercano: {distancia_cercana:.2f} km"
+    for point in clean_points:
+        is_nearest = point is nearest_point
+        popup = f"{point['nombre']} - {point['direccion']}"
+        if is_nearest:
+            popup += f"<br>Punto más cercano: {nearest_distance:.2f} km"
 
         folium.Marker(
-            location=p["coords"],
+            location=point["coords"],
             popup=popup,
-            tooltip=f"{p['nombre']} (más cercano)" if es_mas_cercano else p["nombre"],
-            icon=folium.Icon(color="orange" if es_mas_cercano else "green"),
-        ).add_to(mapa)
+            tooltip=f"{point['nombre']} (más cercano)" if is_nearest else point["nombre"],
+            icon=folium.Icon(color="orange" if is_nearest else "green"),
+        ).add_to(folium_map)
 
     folium.Marker(
         location=user_location,
         popup="Tu ubicación",
         tooltip="Tu ubicación",
         icon=folium.Icon(color="blue", icon="user", prefix="fa"),
-    ).add_to(mapa)
+    ).add_to(folium_map)
 
-    mapa.fit_bounds([p["coords"] for p in puntos_limpios] + [user_location])
-    return mapa
+    folium_map.fit_bounds([point["coords"] for point in clean_points] + [user_location])
+    return folium_map
