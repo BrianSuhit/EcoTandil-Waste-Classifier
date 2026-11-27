@@ -28,16 +28,16 @@ Pero ubicar un Punto Limpio no sirve de mucho si primero no sabés si lo que ten
 Para este prototipo busqué un equilibrio entre facilidad para el vecino y rapidez de desarrollo, asumiendo los siguientes compromisos técnicos:
 
 **Cálculo de distancia directa con Haversine (en vez de una API de mapas o base de datos geoespacial):**
--  *Pro:* Resuelve el cálculo en memoria al instante usando funciones matemáticas nativas de Python, sin dependencias pesadas ni costos de APIs externas para este MVP.
--  *Contra:* Mide la distancia en línea recta ("a vuelo de pájaro") y no el recorrido real por calles o tráfico. Para una versión en producción no alcanza: se necesitaría conectar un motor de ruteo o un servicio de GPS (como OSRM o Google Maps) que calcule el trayecto real a pie o en auto.
+-  ✅ *Pro:* Resuelve el cálculo en memoria al instante usando funciones matemáticas nativas de Python, sin dependencias pesadas ni costos de APIs externas para este MVP.
+-  ❌ *Contra:* Mide la distancia en línea recta ("a vuelo de pájaro") y no el recorrido real por calles o tráfico. Para una versión en producción no alcanza: se necesitaría conectar un motor de ruteo o un servicio de GPS (como OSRM o Google Maps) que calcule el trayecto real a pie o en auto.
 
 **Salida estructurada con Pydantic (modelo `recyclingReview`):**
--  *Pro:* Obliga al modelo a responder bajo un esquema fijo (`waste`, `is_recyclable`, `instructions`), lo que permite mostrar en Streamlit carteles claros (verde si es apto, rojo si no) y las indicaciones sin textos desordenados.
--  *Contra:* Si el vecino sube una foto con varios objetos distintos mezclados o algo ambiguo, el modelo está obligado a dar un único veredicto booleano (`True` o `False`), perdiendo el matiz de si una parte sirve y otra no.
+-  ✅ *Pro:* Obliga al modelo a responder bajo un esquema fijo (`waste`, `is_recyclable`, `instructions`), lo que permite mostrar en Streamlit carteles claros (verde si es apto, rojo si no) y las indicaciones sin textos desordenados.
+-  ❌ *Contra:* Si el vecino sube una foto con varios objetos distintos mezclados o algo ambiguo, el modelo está obligado a dar un único veredicto booleano (`True` o `False`), perdiendo el matiz de si una parte sirve y otra no.
 
 **Modelo liviano en vez de un modelo más pesado:**
--  *Pro:* Respuesta muy rápida (pocos segundos) y costo casi cero para iterar y probar el clasificador.
--  *Contra:* En fotos con poca luz, ángulos difíciles o materiales dudosos, un modelo ligero tiene más probabilidad de equivocarse en la visión que un modelo más grande.
+-  ✅ *Pro:* Respuesta muy rápida (pocos segundos) y costo casi cero para iterar y probar el clasificador.
+-  ❌ *Contra:* En fotos con poca luz, ángulos difíciles o materiales dudosos, un modelo ligero tiene más probabilidad de equivocarse en la visión que un modelo más grande.
 
 ## Mejoras a futuro
 -  **Switch dinámico de modelos en tiempo de ejecución:** Separar la carga según el tipo de consulta: usar un LLM optimizado puramente para texto cuando el vecino escribe, y derivar a un modelo multimodal especializado (como la familia nano-banana de Google) únicamente cuando se sube una foto, optimizando costos y tiempos de respuesta.
