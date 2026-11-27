@@ -24,11 +24,17 @@ REGLAS DE CLASIFICACIÓN:
 3. Si es reciclable, brinda instrucciones claras de acondicionamiento (ej: limpios, secos, aplastados, botellas cerradas para el aceite)."""
 
 
+def codificar_imagen(image_bytes: bytes) -> str:
+    """Convierte los bytes de una imagen a cadena Base64 UTF-8."""
+    raw_b64 = base64.b64encode(image_bytes)
+    return raw_b64.decode("utf-8")
+
+    
 def classify_waste(text, image_bytes=None, mime_type="image/jpeg"):
     try:
         input_data = text
         if image_bytes is not None:
-            encoded_image = base64.b64encode(image_bytes).decode("utf-8")
+            encoded_image = codificar_imagen(image_bytes)
             input_data = [{"type": "image", "data": encoded_image, "mime_type": mime_type}]
         interaction = client.interactions.create(
             model="gemini-3.5-flash-lite",

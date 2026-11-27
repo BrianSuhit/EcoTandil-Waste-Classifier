@@ -23,14 +23,14 @@ with consultation_tab:
         if not waste_text and not uploaded_image:
             st.warning("Ingresá un texto o una foto.")
         else:
-            image_bytes = uploaded_image.getvalue() if uploaded_image else None
+            image_bytes = None
+            mime_type = "image/jpeg"
+            if uploaded_image:
+                image_bytes = uploaded_image.getvalue()
+                mime_type = uploaded_image.type
 
             with st.spinner("Consultando a Punto Limpio..."):
-                result = classify_waste(
-                    text=waste_text,
-                    image_bytes=image_bytes,
-                    mime_type=uploaded_image.type if uploaded_image else "image/jpeg",
-                )
+                result = classify_waste(text=waste_text,image_bytes=image_bytes,mime_type=mime_type)
 
             if result.is_recyclable:
                 st.success(f"Es reciclable: {result.waste}")
