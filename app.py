@@ -1,9 +1,9 @@
 import streamlit as st
 from streamlit_folium import st_folium
 from streamlit_geolocation import streamlit_geolocation
+
 from main import classify_waste
 from map import create_map
-
 
 st.title("EcoPunto Tandil ♻️", text_alignment="center")
 

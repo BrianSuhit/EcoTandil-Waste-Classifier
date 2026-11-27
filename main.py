@@ -1,6 +1,8 @@
 import base64
+
 from google import genai
 from google.genai.errors import APIError
+
 from models import recyclingReview
 
 client = genai.Client()
@@ -32,10 +34,15 @@ def codificar_imagen(image_bytes: bytes) -> str:
     
 def classify_waste(text, image_bytes=None, mime_type="image/jpeg"):
     try:
-        input_data = text
+        input_data = []
+        
+        if text and text.strip():
+            input_data.append({"type": "text", "text": text.strip()})
+        
         if image_bytes is not None:
             encoded_image = codificar_imagen(image_bytes)
-            input_data = [{"type": "image", "data": encoded_image, "mime_type": mime_type}]
+            input_data.append({"type": "image", "data": encoded_image, "mime_type": mime_type})
+            
         interaction = client.interactions.create(
             model="gemini-3.5-flash-lite",
             system_instruction=system_instruction,
